@@ -101,7 +101,7 @@ class BotIRC(BaseIRC):
 		elif string.startswith('!'): #USER command
 			del self.userCommands[handlerPrefix]
 	def dispatchCommand(self, msg):
-		if msg.startswith(':') and msg.count(':') > 2: #USER command
+		if msg.startswith(':') and msg.count(':') > 1: #USER command
 			print msg[msg.index(':',1)+1:]
 			
 			for handlerPrefix in self.userCommands.keys():

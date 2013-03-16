@@ -24,6 +24,7 @@ class BaseIRC(object):
 		self.info_name = kwargs.get("info_name", "testname")
 		self.ircsock = None
 		self.running = False
+		
 	def connect(self):
 		try:
 			self.ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,11 +33,14 @@ class BaseIRC(object):
 		except SocketError:
 			return False
 		return True
+	
 	def dispatch(self):
 		raise NotImplemented
+	
 	def send(self, msg):
 		print(msg)
 		#self.ircsock.send(msg)
+	
 	def server_login(self):	
 		self.send("USER %s %s %s %s\n" % ( botuser, bothost, botserver, botname) )
 		self.send("NICK %s\n" % botnick) # Here we actually assign the nick to the bot

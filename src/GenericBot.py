@@ -32,8 +32,6 @@ class GenericBot(BotIRC):
             ":b0nk!LoC@fake.dimension PRIVMSG #test :%shop <nick> +" % self.userCmdPrefix,
             ":b0nk!LoC@fake.dimension PRIVMSG #test :%shop <nick> -" % self.userCmdPrefix,
             ":xterm!xterm@admin PRIVMSG xterm :%sauth xterm" % self.userCmdPrefix,
-            ":xterm!xterm@admin PRIVMSG xterm :%sauth xterm SuperSecretPassword" % self.userCmdPrefix,
-            ":xterm!xterm@admin PRIVMSG xterm :%sauth xterm" % self.userCmdPrefix,
             ":b0nk!LoC@fake.dimension PRIVMSG #test :%sdie" % self.userCmdPrefix
             ]
         

@@ -4,6 +4,8 @@ import time
 import random
 import traceback
 
+Command = lambda kwargs: type('', (object,), kwargs)()
+
 class BaseIRC(object):
     def __init__(self, *args, **kwargs):
         self.debug =  kwargs.get("debug", True)
@@ -103,8 +105,8 @@ class BotIRC(BaseIRC):
                 for handlerPrefix in self.userCommands.keys():
                     if msg[msg.index(':',1)+1:].startswith(handlerPrefix):
                         #if self.debug: print('dispatching user command: \'%s\'' %handlerPrefix)
-                        if self.getNick(msg) in self.authUsers: self.userCommands[handlerPrefix](msg, auth=True)
-                        else: self.userCommands[handlerPrefix]['func'](msg)
+                        print self.userCommands[handlerPrefix]
+                        self.userCommands[handlerPrefix](msg)
             else:
                 for handlerPrefix in self.serverCommands.keys(): #SERVER command
                     if msg.startswith(handlerPrefix):
@@ -117,9 +119,4 @@ class BotIRC(BaseIRC):
         self.running = True
         while self.running:
             self.dispatchCommand(self.recv())
-                
-    class Command():
-        def __init__():
-            raise NotImplemented
-        def execute():
-            raise NotImplemented
+ 

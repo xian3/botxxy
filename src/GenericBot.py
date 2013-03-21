@@ -15,7 +15,7 @@ version = "0.0.1.0"
 class GenericBot(BotIRC):
     def __init__(self, *args, **kwargs):
         super(GenericBot, self).__init__(*args, **kwargs)
-        print 'init GenericBotIRC'
+        ` 'init GenericBotIRC'
         self.userCredsFile = kwargs.get('userCredsFile', 'userCreds') 
         self.authUsers = []
         self.testInput = ["PING :data data data",
@@ -34,50 +34,58 @@ class GenericBot(BotIRC):
             ":xterm!xterm@admin PRIVMSG xterm :%sauth xterm" % self.userCmdPrefix,
             ":b0nk!LoC@fake.dimension PRIVMSG #test :%sdie" % self.userCmdPrefix
             ]
-        
+    # Permission check wrapper
+    def requiresPermissions(func):
+        def decorator(self, msg, *args):
+            if self.getUser(msg) in self.authUsers:
+                return func(self, msg, *args)
+            else:
+                if self.getChannel(msg) is not None:
+                    self.sendChanMsg(self.getChannel(msg), 'You are not authorized to execute this command')
+                else:
+                    self.sendUserMsg(self.getNick(msg), 'You are not authorized to execute this command')
+                return None
+        return decorator
+    def mustBeInChannel(func):
+        def decorator(self, msg, *args):
+            if self.getChannel(msg) is None:
+                self.sendUserMsg(self.getNick(msg), 'You must be in a channel to use this command')
+            else:
+                return func(self, msg, *args)
+        return decorator
     def addCommands(self):
         self.registerCommand('PING ', self.ping)
-        self.registerCommand('%sauth'%self.userCmdPrefix,{
-            'func':self.authCmd,
-            'auth':False,
+        self.registerCommand('%sauth'%self.userCmdPrefix,Command( {
+            '__call__':self.authCmd,
             'help':'%sauth [password] - Providing a correct password will log you in, no password will attempt to log you out\n' %self.userCmdPrefix
-            })
-        self.registerCommand('%shelp'%self.userCmdPrefix,{
-            'func':self.helpCmd,
-            'auth':False,
-            'help':'.help <.command> - Displays the help menu for the given command.\n'})
-        self.registerCommand('%sinvite'%self.userCmdPrefix, {
-            'func':self.inviteCmd,
-            'auth':False,
-            'help':'%sinvite <nick> - Invites a user to a channel.' %self.userCmdPrefix})
-        self.registerCommand('%skick'%self.userCmdPrefix, {
-            'func':self.kickCmd,
-            'auth':False,
-            'help':'%skick <nick> - Will kick a user from the channel.' %self.userCmdPrefix})
-        self.registerCommand('%sjoin'%self.userCmdPrefix, {
-            'func':self.joinCmd,
-            'auth':False,
-            'help':'%sjoin <nick> - Adds the bot to a channel.' %self.userCmdPrefix})
-        self.registerCommand('%spart'%self.userCmdPrefix, {
-            'func':self.partCmd,
-            'auth':False,
-            'help':'%spart [channel] - Removes the bot from this or another channel.' %self.userCmdPrefix})
-        self.registerCommand('%svoice'%self.userCmdPrefix, {
-            'func':self.voiceCmd,
-            'auth':False,
-            'help':'%svoice <nick> [-] - +v/-v' %self.userCmdPrefix})
-        self.registerCommand('%sop'%self.userCmdPrefix, {
-            'func':self.opCmd,
-            'auth':False,
-            'help':'%sop <nick> [-] - +o/-o' %self.userCmdPrefix})
-        self.registerCommand('%shop'%self.userCmdPrefix, {
-            'func':self.hopCmd,
-            'auth':False,
-            'help':'%shop <nick> [-] - +h/-h' %self.userCmdPrefix})
-        self.registerCommand('%sdie'%self.userCmdPrefix, {
-            'func':self.killCmd,
-            'auth':False,
-            'help':'%skill - Kills the bot' %self.userCmdPrefix})
+            }))
+        self.registerCommand('%shelp'%self.userCmdPrefix, Command({
+            '__call__':self.helpCmd,
+            'help':'.help <.command> - Displays the help menu for the given command.\n'}))
+        self.registerCommand('%sinvite'%self.userCmdPrefix, Command({
+            '__call__':self.inviteCmd,
+            'help':'%sinvite <nick> - Invites a user to a channel.' %self.userCmdPrefix}))
+        self.registerCommand('%skick'%self.userCmdPrefix, Command({
+            '__call__':self.kickCmd,
+            'help':'%skick <nick> - Will kick a user from the channel.' %self.userCmdPrefix}))
+        self.registerCommand('%sjoin'%self.userCmdPrefix, Command({
+            '__call__':self.joinCmd,
+            'help':'%sjoin <nick> - Adds the bot to a channel.' %self.userCmdPrefix}))
+        self.registerCommand('%spart'%self.userCmdPrefix, Command({
+            '__call__':self.partCmd,
+            'help':'%spart [channel] - Removes the bot from this or another channel.' %self.userCmdPrefix}))
+        self.registerCommand('%svoice'%self.userCmdPrefix, Command({
+            '__call__':self.voiceCmd,
+            'help':'%svoice <nick> [-] - +v/-v' %self.userCmdPrefix}))
+        self.registerCommand('%sop'%self.userCmdPrefix, Command({
+            '__call__':self.opCmd,
+            'help':'%sop <nick> [-] - +o/-o' %self.userCmdPrefix}))
+        self.registerCommand('%shop'%self.userCmdPrefix, Command({
+            '__call__':self.hopCmd,
+            'help':'%shop <nick> [-] - +h/-h' %self.userCmdPrefix}))
+        self.registerCommand('%sdie'%self.userCmdPrefix, Command({
+            '__call__':self.killCmd,
+            'help':'%sdie - Kills the bot' %self.userCmdPrefix}))
         
     def getNick(self, msg): # Returns the nickname of whoever requested a command from a RAW irc privmsg. Example in commentary below.
         # ":b0nk!LoC@fake.dimension PRIVMSG #test :lolmessage"
@@ -103,120 +111,114 @@ class GenericBot(BotIRC):
         args = self.getUserCommandArgs(msg)
         db = anydbm.open(self.userCredsFile, 'c')
         if len(args) == 1 and auth is True:
-            self.authUsers = [user for user in self.authUsers if user != self.getUser(msg)]
+            self.authUsers.remove(self.getUser(msg))
         elif len(args) == 2 and self.getChannel(msg) is not None:
             try:
                 del db[self.getUser(msg)]
                 self.sendChanMsg(self.getChannel(msg), 'You have compromised yourself. You have been removed from the privileged users list.\n')
             except:
-                self.senChanMsg(self.getChannel(msg), 'Good job! Now go change all of your passwords!\n')
+                self.sendChanMsg(self.getChannel(msg), 'Good job! Now go change all of your passwords!\n')
         elif len(args) == 2:
             for user, storedHash in db.iteritems():
-                print('%s %s' % (user, storedHash))
                 if user == self.getUser(msg):
                     if sha1(args[1]).hexdigest() == storedHash: 
                         self.authUsers.append(self.getUser(msg))
                         self.sendUserMsg(self.getNick(msg), 'Authenticated %s successfully.' % self.getUser(msg))
                     else: self.sendUserMsg(self.getNick(msg), 'Failed to authenticate %s' % self.getUser(msg))
         db.close()
-        
+    @requiresPermissions
+    @mustBeInChannel
     def inviteCmd(self, msg): # Parses the message to extract NICK and CHANNEL
         # ":b0nk!LoC@fake.dimension PRIVMSG #test :!invite <nick>"
         channel = self.getChannel(msg)
-        if channel is not None:
-            args = self.getUserCommandArgs(msg)
-            if len(args) is 2: # Checks if user inserted a nickname to invite
-                target = args[1]
-                self.sendChanMsg(channel, "Inviting %s to %s.\n" % (target, channel) )
-                self.invite(target,channel)
-            else: # Success
-                self.sendChanMsg(channel,"Bad arguments. Usage: %sinvite <nick>"%self.userCmdPrefix)
-        else:
-            self.sendChanMsg(channel, 'You must be in a channel to use this command')
+        args = self.getUserCommandArgs(msg)
+        if len(args) is 2: # Checks if user inserted a nickname to invite
+            target = args[1]
+            self.sendChanMsg(channel, "Inviting %s to %s.\n" % (target, channel) )
+            self.invite(target,channel)
+        else: # Success
+            self.sendChanMsg(channel,"Bad arguments. Usage: %sinvite <nick>"%self.userCmdPrefix)
+    @requiresPermissions
     def joinCmd(self, msg):
         args=self.getUserCommandArgs(msg)
         if (len(args) == 2) and args[1].startswith('#'):
             self.joinChannel(args[1])
+    @requiresPermissions
     def partCmd(self, msg):
         args=self.getUserCommandArgs(msg)
         if (len(args) == 1) and (self.getChannel(msg) is not None): self.partChannel(self.getChannel(msg))
         elif (len(args) == 2) and args[1].startswith('#'): self.partChannel(args[1])
-            
+    @requiresPermissions
+    @mustBeInChannel
     def kickCmd(self, msg): # Parses the message to extract NICK and CHANNEL
         # ":b0nk!LoC@fake.dimension PRIVMSG #test :!kick "
         channel = self.getChannel(msg)
-        if channel is not None:
-            args = self.getUserCommandArgs(msg)
-            if len(args) <2: 
-                self.sendChanMsg(channel,"Bad arguments. Usage: %skick <nick> [reason]"%self.userCmdPrefix)# Success
-                return
-            if len(args) >=2: target = args[1]
-            reason = ' '.join(args[2:])
-            if reason is not '': self.kick(target,channel, reason)
-            else: self.kick(target,channel, '')
-        else:
-            self.sendChanMsg(channel, 'You must be in a channel to use this command')
+        args = self.getUserCommandArgs(msg)
+        if len(args) <2: 
+            self.sendChanMsg(channel,"Bad arguments. Usage: %skick <nick> [reason]"%self.userCmdPrefix)# Success
+            return
+        if len(args) >=2: target = args[1]
+        reason = ' '.join(args[2:])
+        if reason is not '': self.kick(target,channel, reason)
+        else: self.kick(target,channel, '')
+
+    @requiresPermissions
+    @mustBeInChannel
     def voiceCmd(self, msg):
         channel = self.getChannel(msg)
-        if channel is not None:
-            args = self.getUserCommandArgs(msg)
-            if len(args) <2: 
-                self.sendChanMsg(channel,"Bad arguments. Usage: %svoice <nick> [+/-]"%self.userCmdPrefix)# Success
-                return
-            if len(args) >=2: target = args[1]
-            if len(args) >=3: mode = args[2]
-            else: mode = '+'
-            self.voice(target,channel, mode)
-        else:
-            self.sendChanMsg(channel, 'You must be in a channel to use this command')
+        args = self.getUserCommandArgs(msg)
+        if len(args) <2: 
+            self.sendChanMsg(channel,"Bad arguments. Usage: %svoice <nick> [+/-]"%self.userCmdPrefix)# Success
+            return
+        if len(args) >=2: target = args[1]
+        if len(args) >=3: mode = args[2]
+        else: mode = '+'
+        self.voice(target,channel, mode)
+    @requiresPermissions
+    @mustBeInChannel
     def opCmd(self, msg):
         channel = self.getChannel(msg)
-        if channel is not None:
-            args = self.getUserCommandArgs(msg)
-            if len(args) <2: 
-                self.sendChanMsg(channel,"Bad arguments. Usage: %sop <nick> [+/-]"%self.userCmdPrefix)# Success
-                return
-            if len(args) >=2: target = args[1]
-            if len(args) >=3: mode = args[2]
-            else: mode = '+'
-            self.op(target,channel, mode)
-        else:
-            self.sendChanMsg(channel, 'You must be in a channel to use this command')
+        args = self.getUserCommandArgs(msg)
+        if len(args) <2: 
+            self.sendChanMsg(channel,"Bad arguments. Usage: %sop <nick> [+/-]"%self.userCmdPrefix)# Success
+            return
+        if len(args) >=2: target = args[1]
+        if len(args) >=3: mode = args[2]
+        else: mode = '+'
+        self.op(target,channel, mode)
+    @requiresPermissions
+    @mustBeInChannel
     def hopCmd(self, msg):
         channel = self.getChannel(msg)
-        if channel is not None:
-            args = self.getUserCommandArgs(msg)
-            if len(args) <2: 
-                self.sendChanMsg(channel,"Bad arguments. Usage: %shop <nick> [+/-]"%self.userCmdPrefix)# Success
-                return
-            if len(args) >=2: target = args[1]
-            if len(args) >=3: mode = args[2]
-            else: mode = '+'
-            self.hop(target,channel, mode)
-        else:
-            self.sendChanMsg(channel, 'You must be in a channel to use this command')
+        args = self.getUserCommandArgs(msg)
+        if len(args) <2: 
+            self.sendChanMsg(channel,"Bad arguments. Usage: %shop <nick> [+/-]"%self.userCmdPrefix)# Success
+            return
+        if len(args) >=2: target = args[1]
+        if len(args) >=3: mode = args[2]
+        else: mode = '+'
+        self.hop(target,channel, mode)
+    @requiresPermissions
     def killCmd(self, msg): #This kills the bot
         self.running = False
         self.send("QUIT oh_noes!_why_%s_whyyyy..._*ded*_X(_(Exited_normally!)\n" % self.getNick(msg))
     def helpCmd(self, msg):
         args = self.getUserCommandArgs(msg)
-        print args
         nick = self.getNick(msg)
         channel = self.getChannel(msg)
         if len(args) >=2 and self.userCommands.get(args[1], None) is not None:
             if channel is not None:
-                print self.userCommands.get(args[1], None)
-                self.sendChanMsg(channel, self.userCommands.get(args[1], None).get('help', 'Empty'))
+                self.sendChanMsg(channel, self.userCommands.get(args[1], None).help)
             else:
-                self.sendUserMsg(nick, self.userCommands.get(args[1], None).get('help', 'Empty'))
+                self.sendUserMsg(nick, self.userCommands.get(args[1], None).help)
         else:
             
             helpmsg ='The available commands are %s' % " ".join(sorted(self.userCommands.keys()))
             if channel is not None:
-                self.sendChanMsg(channel, self.userCommands.get(args[0], None).get('help', 'This Cruft'))
+                self.sendChanMsg(channel, self.userCommands.get(args[0], None).help)
                 self.sendChanMsg(channel, helpmsg)
             else:
-                self.sendUserMsg(nick, self.userCommands.get(args[0], None).get('help', 'This Cruft'))
+                self.sendUserMsg(nick, self.userCommands.get(args[0], None).help)
                 self.sendUserMsg(nick, helpmsg)
 """                
     class buildHelpMenu():
@@ -542,4 +544,4 @@ class GenericBot(BotIRC):
         sendUserMsg(nick, "Channel control commands: !op !deop !hop !dehop !voice !devoice !topic !kick !randkick")
         time.sleep(0.5)
         sendUserMsg(nick, "I've been written in python 2.7 and if you want to contribute or just have an idea, talk to b0nk on #test .")
-"""
+"""        

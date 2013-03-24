@@ -235,8 +235,6 @@ class GenericBot(BotIRC):
                         self.sendChanMsg(self.getChannel(msg), command.help)
                     else:
                         self.sendUserMsg(self.getNick(msg), command.help)
-                    
-                
         elif len(args) == 1:
             for commands in self.msgHandlers.values():
                 for command in commands:

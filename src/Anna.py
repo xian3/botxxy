@@ -24,17 +24,20 @@ class AnnaBot(GenericBot):
         super(AnnaBot, self).addCommands() #Adds all the Generic Commands
         self.registerCommand(Command( {
             '__call__':self.addQuoteCmd,
-            'regex':'^:\S* PRIVMSG #\w+ :%saddquote'% self.userCmdPrefix,
+            'name':'%saddquote' % self.userCmdPrefix,
+            'regex':'^:\S* PRIVMSG #\w+ :[%s]addquote'% self.userCmdPrefix,
             'help':'%saddquote <quote> - Adds a quote to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.quoteCmd,
-            'regex':'^:\S* PRIVMSG #\w+ :%squote'% self.userCmdPrefix,
+            'name':'%squote' % self.userCmdPrefix,
+            'regex':'^:\S* PRIVMSG #\w+ :[%s]quote'% self.userCmdPrefix,
             'help':'%squote [name] - Pulls a quote from the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.addJoinHandler,
-            'regex':'^:\S* PRIVMSG #\w+ :%saddjoin'% self.userCmdPrefix,
+            'name':'%saddjoin' % self.userCmdPrefix,
+            'regex':'^:\S* PRIVMSG #\w+ :[%s]addjoin'% self.userCmdPrefix,
             'help':'%saddjoin <PHRASE> - Adds a join message to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
@@ -43,7 +46,8 @@ class AnnaBot(GenericBot):
             }))
         self.registerCommand(Command( {
             '__call__':self.addPartHandler,
-            'regex':'^:\S* PRIVMSG #\w+ :%saddpart'% self.userCmdPrefix,
+            'name':'%saddpart' % self.userCmdPrefix,
+            'regex':'^:\S* PRIVMSG #\w+ :[%s]addpart'% self.userCmdPrefix,
             'help':'%saddpart <PHRASE> - Adds a parting message to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
@@ -109,10 +113,7 @@ class AnnaBot(GenericBot):
 def main():
     anna = AnnaBot()
     anna.addCommands()
-    db = anydbm.open(anna.userCredsFile, 'c')
-    #db['xterm!~xterm@fake.email'] = '6c54b5c3c5f3e93afc004346ec96ddb88433b263'
-    db['b0nk!~LoC@fake.dimension'] = 'b94ced3ded72349a8af691a0aa9153c0d9853568'
-    db.close()
+
     if anna.debug:
         for test in anna.testInput:
                 pass #anna.dispatchCommand(test) #structured test mode

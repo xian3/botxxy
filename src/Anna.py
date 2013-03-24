@@ -17,20 +17,40 @@ class AnnaBot(GenericBot):
         kwargs['info_nick'] = "Anna"
         super(AnnaBot, self).__init__(*args, **kwargs)
         self.quotesDir = './quotes/'
-        self.greetingFile = './greetings/'
+        self.partsDir = './parts/'
+        self.joinsDir = './joins/'
         
     def addCommands(self):
         super(AnnaBot, self).addCommands() #Adds all the Generic Commands
-        self.registerCommand('%saddquote'%self.userCmdPrefix,Command( {
+        self.registerCommand(Command( {
             '__call__':self.addQuoteCmd,
+            'regex':'^:\S* PRIVMSG #\w+ :%saddquote'% self.userCmdPrefix,
             'help':'%saddquote <quote>\n' %self.userCmdPrefix
             }))
-        self.registerCommand('%squote'%self.userCmdPrefix,Command( {
+        self.registerCommand(Command( {
             '__call__':self.quoteCmd,
+            'regex':'^:\S* PRIVMSG #\w+ :%squote'% self.userCmdPrefix,
             'help':'%squote <name>\n' %self.userCmdPrefix
             }))
+        self.registerCommand(Command( {
+            '__call__':self.addJoinHandler,
+            'regex':'^:\S* PRIVMSG #\w+ :%saddjoin'% self.userCmdPrefix,
+            'help':'%saddjoin <PHRASE>\n' %self.userCmdPrefix
+            }))
+        self.registerCommand(Command( {
+            '__call__':self.joinHandler,
+            'regex':'^:\S* JOIN #\w+'
+            }))
+        self.registerCommand(Command( {
+            '__call__':self.addPartHandler,
+            'regex':'^:\S* PRIVMSG #\w+ :%saddpart'% self.userCmdPrefix,
+            'help':'%saddpart <PHRASE>\n' %self.userCmdPrefix
+            }))
+        self.registerCommand(Command( {
+            '__call__':self.partHandler,
+            'regex':'^:\S* PART #\w+'
+            }))
     def addQuoteCmd(self, msg):
-        user = self.getUser(msg)
         f = open('%s%s'% (self.quotesDir, self.getNick(msg)), 'a')
         msg = msg[msg.index('%saddquote '% self.userCmdPrefix):]
         msg = msg.lstrip('%saddquote '% self.userCmdPrefix)
@@ -47,19 +67,52 @@ class AnnaBot(GenericBot):
         lines = f.readlines()
         f.close()
         if self.getChannel(msg) is not None:
-            self.sendChanMsg(self.getChannel(msg), '%s' % random.choice(lines))
+            self.sendChanMsg(self.getChannel(msg), '%s - %s' % (f.name, random.choice(lines)))
         else:
-            self.sendUserMsg(self.getNick(msg), '%s' % lines[random.randint(0,len(lines))])
+            self.sendUserMsg(self.getNick(msg), '%s - %s' % (f.name, random.choice(lines)))
+    def addPartHandler(self, msg):
+        f = open('%s%s'% (self.partsDir, self.getNick(msg)), 'a')
+        msg = msg[msg.index('%saddpart '% self.userCmdPrefix):]
+        msg = msg.lstrip('%saddpart '% self.userCmdPrefix)
+        f.write('%s\n' % msg)
+        f.close()
+    def partHandler(self, msg):
+        if (os.access('%s%s'% (self.partsDir, self.getNick(msg)), os.F_OK)):
+            f = open('%s%s'% (self.partsDir, self.getNick(msg)), 'r')
+            lines = f.readlines()
+            f.close()
+            if self.getChannel(msg) is not None:
+                self.sendChanMsg(self.getChannel(msg), '%s' % (random.choice(lines)))
+            else:
+                self.sendUserMsg(self.getNick(msg), '%s' % (random.choice(lines)))
+    def addJoinHandler(self, msg):
+        f = open('%s%s'% (self.joinsDir, self.getNick(msg)), 'a')
+        msg = msg[msg.index('%saddjoin '% self.userCmdPrefix):]
+        msg = msg.lstrip('%saddjoin '% self.userCmdPrefix)
+        f.write('%s\n' % msg)
+        f.close()       
+    def joinHandler(self, msg):
+        if (os.access('%s%s'% (self.joinsDir, self.getNick(msg)), os.F_OK)):
+            f = open('%s%s'% (self.joinsDir, self.getNick(msg)), 'r')
+            lines = f.readlines()
+            f.close()
+            if self.getChannel(msg) is not None:
+                self.sendChanMsg(self.getChannel(msg), '%s' % (random.choice(lines)))
+            else:
+                self.sendUserMsg(self.getNick(msg), '%s' % (random.choice(lines)))
+    
         
+    
             
         
 # ":b0nk!LoC@fake.dimension PRIVMSG #test :lolmessage"        
 def main():
     anna = AnnaBot()
     anna.addCommands()
-    #db = anydbm.open(anna.userCredsFile, 'c')
+    db = anydbm.open(anna.userCredsFile, 'c')
     #db['xterm!~xterm@fake.email'] = '6c54b5c3c5f3e93afc004346ec96ddb88433b263'
-    #db.close()
+    db['b0nk!~LoC@fake.dimension'] = 'b94ced3ded72349a8af691a0aa9153c0d9853568'
+    db.close()
     if anna.debug:
         for test in anna.testInput:
                 pass #anna.dispatchCommand(test) #structured test mode

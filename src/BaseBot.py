@@ -3,6 +3,7 @@ import ssl
 import time
 import random
 import traceback
+import re
 
 Command = lambda kwargs: type('', (object,), kwargs)()
 
@@ -32,9 +33,9 @@ class BaseIRC(object):
     def dispatchCommand(self):
         raise NotImplemented
     def send(self, msg):
-        if self.debug: print(msg)
+        if self.debug: print(msg.rstrip())
         else:
-            print(msg)
+            #print(msg)
             self.ircsock.send(msg)
     def recv(self):
         if self.debug: return raw_input(">>>")
@@ -43,6 +44,7 @@ class BaseIRC(object):
                 recvd = self.ircsock.recv(512).rstrip()
             except KeyboardInterrupt:
                 raise KeyboardInterrupt
+            #print recvd
             return recvd
     def server_login(self):	
         self.send("USER %s %s %s %s\n" % ( self.info_user, self.info_host, self.info_server, self.info_name) )
@@ -83,35 +85,26 @@ class BotIRC(BaseIRC):
         super(BotIRC, self).__init__(*args, **kwargs)
         print('init BotIRC')
         self.userCmdPrefix = kwargs.get('userCmdPrefix', '!')
-        self.userCommands = {}
-        self.serverCommands = {}
-    def registerCommand(self, handlerPrefix, command):
-        if type(handlerPrefix) is str:
-            if handlerPrefix.startswith('%s'% self.userCmdPrefix): #USER command
-                if self.debug: print('registering user command: \'%s\'' %handlerPrefix)
-                self.userCommands[handlerPrefix] = command
-            else:
-                if self.debug: print('registering server command: \'%s\'' %handlerPrefix)
-                self.serverCommands[handlerPrefix] = command
+        self.msgHandlers = {
+            }
+    def registerCommand(self, command):
+        if command.regex not in self.msgHandlers: self.msgHandlers[command.regex] = []
+        self.msgHandlers[command.regex].append(command)
     def unregisterCommand(self, handlerPrefix):
         print('unregistering \'%s\'' %handlerPrefix)
         if handlerPrefix.startswith(' '): #SERVER command
             del self.serverCommands[handlerPrefix]
         elif handlerPrefix.startswith('%s'%self.userCmdPrefix): #USER command
-            del self.userCommands[handlerPrefix]
+            del self.msgHandlers[handler][handlerPrefix]
     def dispatchCommand(self, msg):
+        msg_split = msg.split(' ')
         try:
-            if msg.startswith(':') and msg.index(':',1) is not -1: #USER command
-                for handlerPrefix in self.userCommands.keys():
-                    if msg[msg.index(':',1)+1:].startswith(handlerPrefix):
-                        #if self.debug: print('dispatching user command: \'%s\'' %handlerPrefix)
-                        print self.userCommands[handlerPrefix]
-                        self.userCommands[handlerPrefix](msg)
-            else:
-                for handlerPrefix in self.serverCommands.keys(): #SERVER command
-                    if msg.startswith(handlerPrefix):
-                        #if self.debug: print('dispatching server command: \'%s\'' %handlerPrefix)
-                        self.serverCommands[handlerPrefix](msg)
+            if msg_split[0].startswith(':%sAnna!~Anna'%self.userCmdPrefix): return
+            for msgHandler in self.msgHandlers.keys():
+                if re.match(msgHandler, msg):
+                    for command in self.msgHandlers[msgHandler]:
+                        command(msg)
+                
         except:
            print('%s\nException caught on %s' %('*'*25,msg))
            traceback.print_exc()

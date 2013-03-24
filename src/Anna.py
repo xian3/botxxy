@@ -25,17 +25,17 @@ class AnnaBot(GenericBot):
         self.registerCommand(Command( {
             '__call__':self.addQuoteCmd,
             'regex':'^:\S* PRIVMSG #\w+ :%saddquote'% self.userCmdPrefix,
-            'help':'%saddquote <quote>\n' %self.userCmdPrefix
+            'help':'%saddquote <quote> - Adds a quote to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.quoteCmd,
             'regex':'^:\S* PRIVMSG #\w+ :%squote'% self.userCmdPrefix,
-            'help':'%squote <name>\n' %self.userCmdPrefix
+            'help':'%squote [name] - Pulls a quote from the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.addJoinHandler,
             'regex':'^:\S* PRIVMSG #\w+ :%saddjoin'% self.userCmdPrefix,
-            'help':'%saddjoin <PHRASE>\n' %self.userCmdPrefix
+            'help':'%saddjoin <PHRASE> - Adds a join message to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.joinHandler,
@@ -44,7 +44,7 @@ class AnnaBot(GenericBot):
         self.registerCommand(Command( {
             '__call__':self.addPartHandler,
             'regex':'^:\S* PRIVMSG #\w+ :%saddpart'% self.userCmdPrefix,
-            'help':'%saddpart <PHRASE>\n' %self.userCmdPrefix
+            'help':'%saddpart <PHRASE> - Adds a parting message to the database.\n' %self.userCmdPrefix
             }))
         self.registerCommand(Command( {
             '__call__':self.partHandler,
@@ -67,9 +67,9 @@ class AnnaBot(GenericBot):
         lines = f.readlines()
         f.close()
         if self.getChannel(msg) is not None:
-            self.sendChanMsg(self.getChannel(msg), '%s - %s' % (f.name, random.choice(lines)))
+            self.sendChanMsg(self.getChannel(msg), '[%s] %s' % (f.name.rsplit('/')[-1], random.choice(lines)))
         else:
-            self.sendUserMsg(self.getNick(msg), '%s - %s' % (f.name, random.choice(lines)))
+            self.sendUserMsg(self.getNick(msg), '[%s] %s' % (f.name.rsplit('/')[-1], random.choice(lines)))
     def addPartHandler(self, msg):
         f = open('%s%s'% (self.partsDir, self.getNick(msg)), 'a')
         msg = msg[msg.index('%saddpart '% self.userCmdPrefix):]

@@ -228,10 +228,20 @@ class GenericBot(BotIRC):
         nick = self.getNick(msg)
         channel = self.getChannel(msg)
         availableCommands = [command.help for command in self.msgHandlers.values() if hasattr(command, 'help')]
-        for commands in self.msgHandlers.values():
-            for command in commands:
-                if hasattr(command, 'help'):
-                    self.sendUserMsg(nick, command.help)
+        if len(args) == 2:
+            for command in self.msgHandlers.values():
+                if command.name is args[1] and hasattr(command, 'help'):
+                    if self.getChannel(msg) is not None:
+                        self.sendChanMsg(self.getChannel(msg), command.help)
+                    else:
+                        self.sendUserMsg(self.getNick(msg), command.help)
+                    
+                
+        elif len(args) == 1:
+            for commands in self.msgHandlers.values():
+                for command in commands:
+                    if hasattr(command, 'help'):
+                        self.sendUserMsg(nick, command.help)
 """    
 :xterm!~xterm@fake.email PRIVMSG xterm :.help
 

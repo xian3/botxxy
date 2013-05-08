@@ -933,12 +933,12 @@ def ign(nick, target):
 	global ignUsrs
 	ignUsrs.append(target)
 	sendNickMsg(nick, target + " ignored!")
-	print(prompt + "Ignored users -> " + ignUsrs.__str__())
+	print(prompt + "Ign -> " + ignUsrs.__str__())
 	
 def fillIgn():
 	global ignUsrs
 	ignUsrs = [line.strip() for line in open('ign.txt', 'r')]
-	print(prompt + "Ignored users -> " + ignUsrs.__str__())
+	print(prompt + "Ign -> " + ignUsrs.__str__())
 
 # Initializations TODO:
 

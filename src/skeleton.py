@@ -2,8 +2,6 @@
 # http://wiki.shellium.org/w/Writing_an_IRC_bot_in_Python
 # http://forum.codecall.net/topic/59608-developing-a-basic-irc-bot-with-python/
 
-__author__ = 'you'
-
 # Import the necessary libraries.
 import socket
 import ssl
@@ -58,7 +56,7 @@ def ping(reply): # This is our first function! It will respond to server Pings.
 
 					#HELLO
 					
-def hello(msg): # This function responds to a user that inputs "Hello testbot"
+def hello(msg): # This function responds to a user that inputs "Hello <botnick>"
 	nick = getNick(msg)
 	chan = getChannel(msg)
 	print(prompt + nick + " said hi in " + chan)

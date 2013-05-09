@@ -6,7 +6,7 @@
 # https://www.hackthissite.org/articles/read/1050
 # http://stackoverflow.com/questions/4719438/editing-specific-line-in-text-file-in-python
 
-__version__ = '0.8.1'
+__version__ = '0.8.2'
 __author__ = 'b0nk'
 
 # Import the necessary libraries.
@@ -102,6 +102,12 @@ def hello(msg): # This function responds to a user that inputs "Hello testbot"
     chan = getChannel(msg)
     print(prompt + nick + " said hi in " + chan)
     sendChanMsg(chan, "Hello " + nick + "! Type !help for more information.")
+	
+def identify():
+  ircsock.send("NICK " + botnick + "\n") # Here we actually assign the nick to the bot
+  time.sleep(3)
+  ircsock.send("NICKSERV IDENTIFY " + botpassword + "\n") # Identifies the bot's nickname with nickserv
+  print(prompt + "Bot identified")
 
 #========================END OF BASIC FUNCTIONS=====================
 
@@ -135,6 +141,32 @@ def authCmd(msg): # Authenticates a nick with the bot TODO: finish this
         sendNickMsg(nick, "Incorrect password!")
       f.close()
 '''
+
+# Ign list
+
+def ignCmd(msg):
+  nick = getNick(msg)
+  global ignUsrs
+  if nick not in ignUsrs:
+    if '#' not in msg.split(':')[1]:
+      target = msg.split(":!ign")[1].lstrip(' ')
+      if target.__len__() > 1:
+        ign(nick, target)
+
+def ign(nick, target):
+  with open("ign.txt", 'a') as f:
+    f.write(target + '\n')
+  f.closed
+  global ignUsrs
+  ignUsrs.append(target)
+  sendNickMsg(nick, target + " ignored!")
+  print(prompt + "Ign -> " + ignUsrs.__str__())
+  
+def fillIgn():
+  global ignUsrs
+  ignUsrs = [line.strip() for line in open('ign.txt', 'r')]
+  print(prompt + "Ign -> " + ignUsrs.__str__())
+
           #INVITE
 
 def inviteCmd(msg): # Parses the message to extract NICK and CHANNEL
@@ -915,31 +947,6 @@ def helpcmd(msg): #Here is the help message to be sent as a private message to t
     time.sleep(0.5)
     sendNickMsg(nick, "I've been written in python 2.7 and if you want to contribute or just have an idea, talk to b0nk on #test .")
 
-# Ign list
-
-def ignCmd(msg):
-  nick = getNick(msg)
-  global ignUsrs
-  if nick not in ignUsrs:
-    if '#' not in msg.split(':')[1]:
-      target = msg.split(":!ign")[1].lstrip(' ')
-      if target.__len__() > 1:
-        ign(nick, target)
-
-def ign(nick, target):
-  with open("ign.txt", 'a') as f:
-    f.write(target + '\n')
-  f.closed
-  global ignUsrs
-  ignUsrs.append(target)
-  sendNickMsg(nick, target + " ignored!")
-  print(prompt + "Ign -> " + ignUsrs.__str__())
-  
-def fillIgn():
-  global ignUsrs
-  ignUsrs = [line.strip() for line in open('ign.txt', 'r')]
-  print(prompt + "Ign -> " + ignUsrs.__str__())
-
 # Initializations TODO:
 
 fillIgn()
@@ -1010,7 +1017,12 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
     
   if ":!help" in ircmsg: # checks for !help
     helpcmd(ircmsg)
-  
+	
+  if ":!ident" in ircmsg:
+    user = getUser(ircmsg)
+    if user == "b0nk!~LoC@fake.dimension":
+      identify()
+	  
   if ":!die" in ircmsg: #checks for !die
     user = getUser(ircmsg)
     if user == "b0nk!~LoC@fake.dimension": # TODO: Now that it is more secure make array of authorized users? or file?

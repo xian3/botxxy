@@ -880,7 +880,7 @@ def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
       chan = getChannel(msg)
       target = getLfmUser(nick) #returns last.fm username associated to nick
       if target.__len__() < 1: #unidentified user
-        sendChanMsg(chan , "I don't know who you are... please use .setuser <last.fm username> to associate your IRC nick with your last.fm username")
+        sendChanMsg(chan , "I don't know who you are... please use .setuser <last.fm username> to associate your IRC nick with your " + lfmlogo + " username")
         print(prompt + nick + " sent .np but is not registered")
       else:
         lfm_user = lastfm.get_user(target) #returns pylast.User object

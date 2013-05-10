@@ -1025,7 +1025,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
 	  
   if ":!die" in ircmsg: #checks for !die
     user = getUser(ircmsg)
-    if user == "b0nk!~LoC@fake.dimension": # TODO: Now that it is more secure make array of authorized users? or file?
+    if user == "b0nk!~LoC@fake.dimension": # TODO:
       quitIRC()
       break
     else:

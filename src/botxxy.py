@@ -1025,7 +1025,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
 	  
   if ":!die" in ircmsg: #checks for !die
     user = getUser(ircmsg)
-    if user == "b0nk!~LoC@fake.dimension": # TODO:
+    if user == "b0nk!~LoC@fake.dimension": # TODO: use auth
       quitIRC()
       break
     else:
@@ -1074,7 +1074,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   if ":!topic" in ircmsg:
     topicCmd(ircmsg)
   '''
-  if ":!pass" in ircmsg:
+  if ":!pass" in ircmsg: #TODO: make this
     authCmd(ircmsg)
   '''
   if ":!quote" in ircmsg:
@@ -1143,7 +1143,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   if ":.setuser" in ircmsg:
     setLfmUserCmd(ircmsg)
   
-  if ircmsg is '':
+  if ircmsg is '' or None:
     print(prompt + "Bot timed out / killed")
     quitIRC()
     break

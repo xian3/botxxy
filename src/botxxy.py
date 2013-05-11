@@ -6,7 +6,7 @@
 # https://www.hackthissite.org/articles/read/1050
 # http://stackoverflow.com/questions/4719438/editing-specific-line-in-text-file-in-python
 
-__version__ = '0.8.2'
+__version__ = '0.8.3'
 __author__ = 'b0nk'
 
 # Import the necessary libraries.
@@ -26,7 +26,7 @@ server = "boxxybabee.catiechat.net" # EU server
 #server = "anewhopeee.catiechat.net" # US server
 port = 6667 # default port
 ssl_port = 6697 # ssl port
-chans = ["#music", "#test", "#boxxy"] #default channels
+chans = ["#test", "#music", "#boxxy"] #default channels
 botnick = "testbot" # bot nick
 botuser = "I"
 bothost = "m.botxxy.you.see"
@@ -869,7 +869,7 @@ def setLfmUser(nick, lfm_username, toSet):
   f.closed
 
 
-def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
+def nowPlaying(msg): # use of the last.fm interface (pylast) in here
   nick = getNick(msg)
   global ignUsrs
   if nick not in ignUsrs:
@@ -878,13 +878,21 @@ def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
       sendNickMsg(nick, "You are not in a channel")
     else:
       chan = getChannel(msg)
-      target = getLfmUser(nick) #returns last.fm username associated to nick
-      if target.__len__() < 1: #unidentified user
-        sendChanMsg(chan , "I don't know who you are... please use .setuser <last.fm username> to associate your IRC nick with your " + lfmlogo + " username")
+      target = msg.split(":.np")[1].lstrip(" ")
+      if target.__len__() < 1: # let's check the file
+        target = getLfmUser(nick)
+      if target.__len__() < 1: # he is not in the db
+        sendChanMsg(chan , "I don't know who you are... please use .np <last.fm username>, alternatively use .setuser <last.fm username> to join your nick with your " + lfmlogo + " account")
         print(prompt + nick + " sent .np but is not registered")
       else:
-        lfm_user = lastfm.get_user(target) #returns pylast.User object
-        if lfm_user.get_playcount().__int__() < 1: #checks if user has played anything EVER
+        lfm_user = lastfm.get_user(target) # returns pylast.User object
+        try:
+          lfm_user.get_id() # some random fuction to raise exception if the user does not exist
+        except(pylast.WSError): # catched the exception, user truly does not exist
+          sendChanMsg(chan, lfmlogo + " " + target + " does not exist")
+          print (prompt + "User " + target + " does not exist")
+          return None # GTFO
+        if lfm_user.get_playcount().__int__() < 1: # checks if user has scrobbled anything EVER
           sendChanMsg(chan, lfmlogo + " " + target + " has an empty library")
           print(prompt + target + " has an empty library")# no need to get a nowplaying when the library is empty
         else:
@@ -892,11 +900,11 @@ def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
           if np is None: # user does not have a now listening track
             sendChanMsg(chan, lfmlogo + " " + target + " does not seem to be playing any music right now...")
             print(prompt + target + " does not seem to be playing any music right now...")
-          else: #all went well
+          else: # all went well
             artist_name = np.artist.get_name().encode('utf8')# string containing artist name
             track = np.title.encode('utf8') #string containing track title
             
-            try:#here we check if the user has ever played the np track
+            try: # here we check if the user has ever played the np track
               playCount = int(np.get_add_info(target).userplaycount)
             except (ValueError, TypeError): #this error means track was never played so we just say it's 1
               playCount = 1

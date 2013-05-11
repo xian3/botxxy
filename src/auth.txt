@@ -1,0 +1,2 @@
+﻿nick|!|password
+b0nk|!|cfacfff557084de1eb5eafe1f63e5d55c6fe6a65d5fe892542fec713c8a33aff

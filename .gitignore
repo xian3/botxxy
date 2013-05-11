@@ -164,5 +164,6 @@ pip-log.txt
 
 # My crap
 
+src/*.txt
 src/*.bat
 .dropbox

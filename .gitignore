@@ -162,6 +162,8 @@ pip-log.txt
 # Mac crap
 .DS_Store
 
+# My crap
+
 src/*.txt
 src/*.bat
 .dropbox

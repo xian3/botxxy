@@ -6,7 +6,7 @@
 # https://www.hackthissite.org/articles/read/1050
 # http://stackoverflow.com/questions/4719438/editing-specific-line-in-text-file-in-python
 
-__version__ = '0.8.1'
+__version__ = '0.8.3'
 __author__ = 'b0nk'
 
 # Import the necessary libraries.
@@ -26,7 +26,7 @@ server = "boxxybabee.catiechat.net" # EU server
 #server = "anewhopeee.catiechat.net" # US server
 port = 6667 # default port
 ssl_port = 6697 # ssl port
-chans = ["#music", "#test", "#boxxy"] #default channels
+chans = ["#test", "#music", "#boxxy"] #default channels
 botnick = "testbot" # bot nick
 botuser = "I"
 bothost = "m.botxxy.you.see"
@@ -102,6 +102,12 @@ def hello(msg): # This function responds to a user that inputs "Hello testbot"
     chan = getChannel(msg)
     print(prompt + nick + " said hi in " + chan)
     sendChanMsg(chan, "Hello " + nick + "! Type !help for more information.")
+	
+def identify():
+  ircsock.send("NICK " + botnick + "\n") # Here we actually assign the nick to the bot
+  time.sleep(3)
+  ircsock.send("NICKSERV IDENTIFY " + botpassword + "\n") # Identifies the bot's nickname with nickserv
+  print(prompt + "Bot identified")
 
 #========================END OF BASIC FUNCTIONS=====================
 
@@ -135,6 +141,32 @@ def authCmd(msg): # Authenticates a nick with the bot TODO: finish this
         sendNickMsg(nick, "Incorrect password!")
       f.close()
 '''
+
+# Ign list
+
+def ignCmd(msg):
+  nick = getNick(msg)
+  global ignUsrs
+  if nick not in ignUsrs:
+    if '#' not in msg.split(':')[1]:
+      target = msg.split(":!ign")[1].lstrip(' ')
+      if target.__len__() > 1:
+        ign(nick, target)
+
+def ign(nick, target):
+  with open("ign.txt", 'a') as f:
+    f.write(target + '\n')
+  f.closed
+  global ignUsrs
+  ignUsrs.append(target)
+  sendNickMsg(nick, target + " ignored!")
+  print(prompt + "Ign -> " + ignUsrs.__str__())
+  
+def fillIgn():
+  global ignUsrs
+  ignUsrs = [line.strip() for line in open('ign.txt', 'r')]
+  print(prompt + "Ign -> " + ignUsrs.__str__())
+
           #INVITE
 
 def inviteCmd(msg): # Parses the message to extract NICK and CHANNEL
@@ -837,7 +869,7 @@ def setLfmUser(nick, lfm_username, toSet):
   f.closed
 
 
-def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
+def nowPlaying(msg): # use of the last.fm interface (pylast) in here
   nick = getNick(msg)
   global ignUsrs
   if nick not in ignUsrs:
@@ -846,13 +878,21 @@ def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
       sendNickMsg(nick, "You are not in a channel")
     else:
       chan = getChannel(msg)
-      target = getLfmUser(nick) #returns last.fm username associated to nick
-      if target.__len__() < 1: #unidentified user
-        sendChanMsg(chan , "I don't know who you are... please use .setuser <last.fm username> to associate your IRC nick with your last.fm username")
+      target = msg.split(":.np")[1].lstrip(" ")
+      if target.__len__() < 1: # let's check the file
+        target = getLfmUser(nick)
+      if target.__len__() < 1: # he is not in the db
+        sendChanMsg(chan , "I don't know who you are... please use .np <last.fm username>, alternatively use .setuser <last.fm username> to join your nick with your " + lfmlogo + " account")
         print(prompt + nick + " sent .np but is not registered")
       else:
-        lfm_user = lastfm.get_user(target) #returns pylast.User object
-        if lfm_user.get_playcount().__int__() < 1: #checks if user has played anything EVER
+        lfm_user = lastfm.get_user(target) # returns pylast.User object
+        try:
+          lfm_user.get_id() # some random fuction to raise exception if the user does not exist
+        except(pylast.WSError): # catched the exception, user truly does not exist
+          sendChanMsg(chan, lfmlogo + " " + target + " does not exist")
+          print (prompt + "User " + target + " does not exist")
+          return None # GTFO
+        if lfm_user.get_playcount().__int__() < 1: # checks if user has scrobbled anything EVER
           sendChanMsg(chan, lfmlogo + " " + target + " has an empty library")
           print(prompt + target + " has an empty library")# no need to get a nowplaying when the library is empty
         else:
@@ -860,11 +900,11 @@ def nowPlaying(msg): # heavy use of the last.fm interface (pylast) in here
           if np is None: # user does not have a now listening track
             sendChanMsg(chan, lfmlogo + " " + target + " does not seem to be playing any music right now...")
             print(prompt + target + " does not seem to be playing any music right now...")
-          else: #all went well
+          else: # all went well
             artist_name = np.artist.get_name().encode('utf8')# string containing artist name
             track = np.title.encode('utf8') #string containing track title
             
-            try:#here we check if the user has ever played the np track
+            try: # here we check if the user has ever played the np track
               playCount = int(np.get_add_info(target).userplaycount)
             except (ValueError, TypeError): #this error means track was never played so we just say it's 1
               playCount = 1
@@ -914,31 +954,6 @@ def helpcmd(msg): #Here is the help message to be sent as a private message to t
     sendNickMsg(nick, "Channel control commands: !op !deop !hop !dehop !voice !devoice !topic !kick !randkick")
     time.sleep(0.5)
     sendNickMsg(nick, "I've been written in python 2.7 and if you want to contribute or just have an idea, talk to b0nk on #test .")
-
-# Ign list
-
-def ignCmd(msg):
-  nick = getNick(msg)
-  global ignUsrs
-  if nick not in ignUsrs:
-    if '#' not in msg.split(':')[1]:
-      target = msg.split(":!ign")[1].lstrip(' ')
-      if target.__len__() > 1:
-        ign(nick, target)
-
-def ign(nick, target):
-  with open("ign.txt", 'a') as f:
-    f.write(target + '\n')
-  f.closed
-  global ignUsrs
-  ignUsrs.append(target)
-  sendNickMsg(nick, target + " ignored!")
-  print(prompt + "Ign -> " + ignUsrs.__str__())
-  
-def fillIgn():
-  global ignUsrs
-  ignUsrs = [line.strip() for line in open('ign.txt', 'r')]
-  print(prompt + "Ign -> " + ignUsrs.__str__())
 
 # Initializations TODO:
 
@@ -1010,10 +1025,15 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
     
   if ":!help" in ircmsg: # checks for !help
     helpcmd(ircmsg)
-  
+	
+  if ":!ident" in ircmsg:
+    user = getUser(ircmsg)
+    if user == "b0nk!~LoC@fake.dimension":
+      identify()
+	  
   if ":!die" in ircmsg: #checks for !die
     user = getUser(ircmsg)
-    if user == "b0nk!~LoC@fake.dimension": # TODO: Now that it is more secure make array of authorized users? or file?
+    if user == "b0nk!~LoC@fake.dimension": # TODO: use auth
       quitIRC()
       break
     else:
@@ -1062,7 +1082,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   if ":!topic" in ircmsg:
     topicCmd(ircmsg)
   '''
-  if ":!pass" in ircmsg:
+  if ":!pass" in ircmsg: #TODO: make this
     authCmd(ircmsg)
   '''
   if ":!quote" in ircmsg:
@@ -1131,7 +1151,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   if ":.setuser" in ircmsg:
     setLfmUserCmd(ircmsg)
   
-  if ircmsg is '':
+  if ircmsg is '' or None:
     print(prompt + "Bot timed out / killed")
     quitIRC()
     break

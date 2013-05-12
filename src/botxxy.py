@@ -925,7 +925,7 @@ def nowPlaying(msg): # use of the last.fm interface (pylast) in here
             tags = tags.rstrip(", ")#removes last comma
             
             sendChanMsg(chan, lfmlogo + " " + target + " is now playing: " + artist_name + " - " + track + " (" + playCount.__str__() + " plays, " + tags + loved + ")")# broadcast to channel
-            print(prompt + "is now playing: " + artist_name + " - " + track + " (" + playCount.__str__() + " plays, " + tags + loved + ")")
+            print(prompt + target + " is now playing: " + artist_name + " - " + track + " (" + playCount.__str__() + " plays, " + tags + loved + ")")
 #(COLOR)last.fm(COLOR) | b0nk is now playing:(UNDERLINE)Joan Jett and the Blackhearts - You Want In, I Want Out(UNDERLINE)(1 plays, rock, rock n roll, Joan Jett, 80s, pop)
     
           #QUIT

@@ -943,7 +943,7 @@ def helpcmd(msg): #Here is the help message to be sent as a private message to t
     time.sleep(0.5)
     sendNickMsg(nick, "General commands: !help !invite !rtd !quote !addquote !setjoinmsg !setquitmsg !starttag !endtag !tag !rose !boobs !8ball")
     time.sleep(0.5)
-    sendNickMsg(nick, lfmlogo + " commands: .setuser .np") #.compare
+    sendNickMsg(nick, lfmlogo + " commands: .setuser .np") #TODO: .compare
     time.sleep(0.5)
     sendNickMsg(nick, "Channel control commands: !op !deop !hop !dehop !voice !devoice !topic !kick !randkick")
     time.sleep(0.5)
@@ -959,7 +959,7 @@ ircsock = ssl.wrap_socket(ircsock) # SSL wrapper for the socket
 ircsock.connect((server, ssl_port)) # Here we connect to the server using the port defined above
 ircsock.send("USER " + botuser + " " + bothost + " " + botserver + " " + botname + "\n") # Bot authentication
 time.sleep(3)
-identify()
+identify() # Bot identification
 time.sleep(3)
 joinChans(chans)
 

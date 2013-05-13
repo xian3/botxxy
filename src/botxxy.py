@@ -6,8 +6,10 @@
 # https://www.hackthissite.org/articles/read/1050
 # http://stackoverflow.com/questions/4719438/editing-specific-line-in-text-file-in-python
 
-__version__ = '0.8.3'
-__author__ = 'b0nk'
+'''
+@author: b0nk
+@version: 0.8.3
+'''
 
 # Import the necessary libraries.
 import socket

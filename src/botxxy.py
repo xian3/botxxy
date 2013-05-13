@@ -958,9 +958,8 @@ ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # TODO: IPv6 ???
 ircsock = ssl.wrap_socket(ircsock) # SSL wrapper for the socket
 ircsock.connect((server, ssl_port)) # Here we connect to the server using the port defined above
 ircsock.send("USER " + botuser + " " + bothost + " " + botserver + " " + botname + "\n") # Bot authentication
-ircsock.send("NICK " + botnick + "\n") # Here we actually assign the nick to the bot
 time.sleep(3)
-ircsock.send("NICKSERV IDENTIFY " + botpassword + "\n") # Identifies the bot's nickname with nickserv
+identify()
 time.sleep(3)
 joinChans(chans)
 

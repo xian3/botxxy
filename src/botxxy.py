@@ -43,7 +43,6 @@ lastcommand = ''
 nicks = []
 taggers = []
 ignUsrs = []
-#alreadyPinged = False
 tagged = ''
 prevTagged = ''
 isTagOn = False

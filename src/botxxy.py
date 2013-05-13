@@ -880,8 +880,8 @@ def nowPlaying(msg): # use of the last.fm interface (pylast) in here
         print(prompt + nick + " sent .np but is not registered")
       else:
         lfm_user = lastfm.get_user(target) # returns pylast.User object
-        try:
-          lfm_user.get_id() # some random fuction to raise exception if the user does not exist
+        try: # some random fuction to raise exception if the user does not exist
+          lfm_user.get_id()
         except(pylast.WSError): # catched the exception, user truly does not exist
           sendChanMsg(chan, lfmlogo + " " + target + " does not exist")
           print (prompt + "User " + target + " does not exist")

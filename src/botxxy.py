@@ -61,17 +61,9 @@ lastfm = pylast.LastFMNetwork(api_key = API_KEY, api_secret = API_SECRET, userna
 #============BASIC FUNCTIONS TO MAKE THIS A BIT EASIER===============
 
 def ping(reply): # This is our first function! It will respond to server Pings.
-    ircsock.send("PONG :testbot Pong\n")
-    '''
-  else: # The NICKSERV operation is here so we can identify the bots nick before joining the default channels
-    ircsock.send("PONG :" + reply + "\n") # In some IRCds it is mandatory to reply to PING the same message we recieve
-    print(prompt + "PONG :" + reply)
-    time.sleep(3)
-    ircsock.send("NICKSERV IDENTIFY " + botpassword + "\n") # Identifies the bot's nickname with nickserv
-    time.sleep(3)
-    joinChans(chans) # Joins the default channels
-    '''
-  
+  ircsock.send("PONG :" + reply + "\n") # In some IRCds it is mandatory to reply to PING the same message we recieve
+  print(prompt + "PONG :" + reply)
+
 def sendChanMsg(chan, msg): # This sends a message to the channel 'chan'
   ircsock.send("PRIVMSG " + chan + " :" + msg + "\n")
   
@@ -980,7 +972,6 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   if "PING :" in ircmsg: # If the server pings us then we've got to respond!
     reply = ircmsg.split("PING :")[1] # In some IRCds it is mandatory to reply to PING the same message we recieve
     ping(reply)
-    alreadyPinged = True
     
   if " 353 " in ircmsg:
     try:

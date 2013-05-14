@@ -61,7 +61,7 @@ lastfm = pylast.LastFMNetwork(api_key = API_KEY, api_secret = API_SECRET, userna
 
 def ping(reply): # This is our first function! It will respond to server Pings.
   ircsock.send("PONG :" + reply + "\n") # In some IRCds it is mandatory to reply to PING the same message we recieve
-  print(prompt + "PONG :" + reply)
+  #print(prompt + "PONG :" + reply)
 
 def sendChanMsg(chan, msg): # This sends a message to the channel 'chan'
   ircsock.send("PRIVMSG " + chan + " :" + msg + "\n")

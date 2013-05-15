@@ -871,7 +871,7 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
       sendNickMsg(nick, "You are not in a channel")
     else:
       chan = getChannel(msg)
-      args = msg.split(":")[2].split(" ") # puts usernames in array
+      args = msg.split(":")[2].rstrip(" ").split(" ") # puts usernames in array
       if args.__len__() == 3: # correct usage
         user_name1 = args[1] # assigning usernames to vars
         user_name2 = args[2]

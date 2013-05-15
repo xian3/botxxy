@@ -871,31 +871,31 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
       sendNickMsg(nick, "You are not in a channel")
     else:
       chan = getChannel(msg)
-      args = msg.split(":")[2].split(" ")
-      if args.__len__() == 3:
-        user_name1 = args[1]
+      args = msg.split(":")[2].split(" ") # puts usernames in array
+      if args.__len__() == 3: # correct usage
+        user_name1 = args[1] # assigning usernames to vars
         user_name2 = args[2]
         try:
-          compare = lastfm.get_user(user_name1).compare_with_user(user_name2, 5)
-        except pylast.WSError as e:
+          compare = lastfm.get_user(user_name1).compare_with_user(user_name2, 5) # comparison information from pylast
+        except pylast.WSError as e: # One or both users do not exist
           print prompt + e.details
           sendChanMsg(chan, lfmlogo + "Error: " + e.details.__str__())
           return None
-        index = round(float(compare[0]),4)*100
+        index = round(float(compare[0]),4)*100 # compare[0] contains a str with a num from 0-1 here we round it to 4 digits and turn it to a percentage 0-100
         raw_artists = []
         raw_artists = compare[1]
         artist_list = ''
-        if raw_artists.__len__() < 1:
+        if raw_artists.__len__() > 0: # users have artists in common
           while raw_artists:
-            artist_list += raw_artists.pop().get_name().encode('utf8') + ", "
+            artist_list += raw_artists.pop().get_name().encode('utf8') + ", " # artist list string is built
           artist_list = artist_list.rstrip(", ")
-        else:
+        else: # no artists in common so we return '(None)'
           artist_list = "(None)"
         sendChanMsg(chan, lfmlogo + " Comparison between " + user_name1 + " and " + user_name2 + ": Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
         print prompt + "Comparison between " + user_name1 + " and " + user_name2 + " " + index + " " + artist_list
       else:
         print prompt + nick + " sent bad arguments for .compare"
-        sendChanMsg(chan, lfmlogo + "Bad arguments! Usage: .compare <nickname1> [nickname2]")
+        sendChanMsg(chan, lfmlogo + "Bad arguments! Usage: .compare <username1> [username2]") # warning for bad usage
 
 
 def nowPlaying(msg): # use of the last.fm interface (pylast) in here

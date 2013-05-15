@@ -28,7 +28,7 @@ server = "boxxybabee.catiechat.net" # EU server
 #server = "anewhopeee.catiechat.net" # US server
 port = 6667 # default port
 ssl_port = 6697 # ssl port
-chans = ["#test", "#music", "#boxxy"] #default channels
+chans = ["#test"] #default channels
 botnick = "testbot" # bot nick
 botuser = "I"
 bothost = "m.botxxy.you.see"
@@ -858,8 +858,37 @@ def setLfmUser(nick, lfm_username, toSet):
         sendNickMsg(nick, "last.fm username set!")
   with open("lfmusers.txt", 'w') as f:
     for i in data:
-      f.write("%s" % i)#stores data back to file
+      f.write("%s" % i) # stores data back to file
   f.closed
+
+
+def compareLfmUsers(msg):
+  nick = getNick(msg)
+  global ignUsrs
+  if nick not in ignUsrs:
+    if '#' not in msg.split(':')[1]:
+      print prompt + nick + " sent .compare outside of a channel"
+      sendNickMsg(nick, "You are not in a channel")
+    else:
+      chan = getChannel(msg)
+      args = msg.split(":")[2].split(" ")
+      if args.__len__() == 3:
+        user_name1 = args[1]
+        user_name2 = args[2]
+        try:
+          compare = lastfm.get_user(user_name1).compare_with_user(user_name2, 5)
+        except pylast.WSError as e:
+          print e.details
+          print e.status
+          return None
+        index = round(float(compare[0]),4)*100
+        raw_artists = []
+        raw_artists = compare[1]
+        artist_list = ''
+        while raw_artists:
+          artist_list += raw_artists.pop().get_name().encode('utf8') + ", "
+        artist_list = artist_list.rstrip(", ")
+        sendChanMsg(chan, lfmlogo + " Comparison between " + user_name1 + " and " + user_name2 + ": Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
 
 
 def nowPlaying(msg): # use of the last.fm interface (pylast) in here
@@ -881,7 +910,7 @@ def nowPlaying(msg): # use of the last.fm interface (pylast) in here
         lfm_user = lastfm.get_user(target) # returns pylast.User object
         try: # some random fuction to raise exception if the user does not exist
           lfm_user.get_id()
-        except(pylast.WSError): # catched the exception, user truly does not exist
+        except pylast.WSError: # catched the exception, user truly does not exist
           sendChanMsg(chan, lfmlogo + " " + target + " does not exist")
           print prompt + "User " + target + " does not exist"
           return None # GTFO
@@ -1141,6 +1170,9 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
   
   if ":.setuser" in ircmsg:
     setLfmUserCmd(ircmsg)
+    
+  if ":.compare" in ircmsg:
+    compareLfmUsers(ircmsg)
   
   if ircmsg is '' or None:
     print prompt + "Bot timed out / killed"

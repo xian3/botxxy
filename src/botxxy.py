@@ -862,7 +862,7 @@ def setLfmUser(nick, lfm_username, toSet):
   f.closed
 
 
-def compareLfmUsers(msg):
+def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
   nick = getNick(msg)
   global ignUsrs
   if nick not in ignUsrs:
@@ -878,17 +878,24 @@ def compareLfmUsers(msg):
         try:
           compare = lastfm.get_user(user_name1).compare_with_user(user_name2, 5)
         except pylast.WSError as e:
-          print e.details
-          print e.status
+          print prompt + e.details
+          sendChanMsg(chan, lfmlogo + "Error: " + e.details.__str__())
           return None
         index = round(float(compare[0]),4)*100
         raw_artists = []
         raw_artists = compare[1]
         artist_list = ''
-        while raw_artists:
-          artist_list += raw_artists.pop().get_name().encode('utf8') + ", "
-        artist_list = artist_list.rstrip(", ")
+        if raw_artists.__len__() < 1:
+          while raw_artists:
+            artist_list += raw_artists.pop().get_name().encode('utf8') + ", "
+          artist_list = artist_list.rstrip(", ")
+        else:
+          artist_list = "(None)"
         sendChanMsg(chan, lfmlogo + " Comparison between " + user_name1 + " and " + user_name2 + ": Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
+        print prompt + "Comparison between " + user_name1 + " and " + user_name2 + " " + index + " " + artist_list
+      else:
+        print prompt + nick + " sent bad arguments for .compare"
+        sendChanMsg(chan, lfmlogo + "Bad arguments! Usage: .compare <nickname1> [nickname2]")
 
 
 def nowPlaying(msg): # use of the last.fm interface (pylast) in here
@@ -910,9 +917,9 @@ def nowPlaying(msg): # use of the last.fm interface (pylast) in here
         lfm_user = lastfm.get_user(target) # returns pylast.User object
         try: # some random fuction to raise exception if the user does not exist
           lfm_user.get_id()
-        except pylast.WSError: # catched the exception, user truly does not exist
-          sendChanMsg(chan, lfmlogo + " " + target + " does not exist")
-          print prompt + "User " + target + " does not exist"
+        except pylast.WSError as e: # catched the exception, user truly does not exist
+          print e.details
+          sendChanMsg(chan, lfmlogo + "Error: " + e.details.__str__())
           return None # GTFO
         if lfm_user.get_playcount().__int__() < 1: # checks if user has scrobbled anything EVER
           sendChanMsg(chan, lfmlogo + " " + target + " has an empty library")

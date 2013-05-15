@@ -28,7 +28,7 @@ server = "boxxybabee.catiechat.net" # EU server
 #server = "anewhopeee.catiechat.net" # US server
 port = 6667 # default port
 ssl_port = 6697 # ssl port
-chans = ["#test"] #default channels
+chans = ["#test", "#music", "#boxxy"] #default channels
 botnick = "testbot" # bot nick
 botuser = "I"
 bothost = "m.botxxy.you.see"
@@ -891,6 +891,7 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
           artist_list = artist_list.rstrip(", ")
         else: # no artists in common so we return '(None)'
           artist_list = "(None)"
+          # TODO: make it pretty like we agreed ;)
         sendChanMsg(chan, lfmlogo + " Comparison between " + user_name1 + " and " + user_name2 + ": Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
         print prompt + "Comparison between " + user_name1 + " and " + user_name2 + " " + index.__str__() + "% " + artist_list
       else:
@@ -978,7 +979,7 @@ def helpcmd(msg): #Here is the help message to be sent as a private message to t
     time.sleep(0.5)
     sendNickMsg(nick, "General commands: !help !invite !rtd !quote !addquote !setjoinmsg !setquitmsg !starttag !endtag !tag !rose !boobs !8ball")
     time.sleep(0.5)
-    sendNickMsg(nick, lfmlogo + " commands: .setuser .np") #TODO: .compare
+    sendNickMsg(nick, lfmlogo + " commands: .setuser .np .compare")
     time.sleep(0.5)
     sendNickMsg(nick, "Channel control commands: !op !deop !hop !dehop !voice !devoice !topic !kick !randkick")
     time.sleep(0.5)

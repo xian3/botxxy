@@ -176,7 +176,7 @@ def inviteCmd(msg): # Parses the message to extract NICK and CHANNEL
       if target.__len__() <= 1: # Checks if user inserted a nickname to invite
         sendChanMsg(chan,"Bad arguments. Usage: !invite <nick>")
       else: # Success
-        print prompt + "Inviting " + target + " to channel " + chan)
+        print prompt + "Inviting " + target + " to channel " + chan
         sendChanMsg(chan, "Inviting " + target + " here...")
         invite(target,chan)
   

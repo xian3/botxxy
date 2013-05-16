@@ -2,10 +2,9 @@ import argparse, os, sys
 from cmd_api import register_cmd
 from auth import privileged_cmd
 import global_vars
-ircd = None
 
 @register_cmd(name='die', aliases=['die'], usage='die', description='die')
-#@privileged_cmd
+@privileged_cmd
 def die(*argv, **kwargs):
     parser = argparse.ArgumentParser(prog=argv[0])
     # Attempt to parse the command line.
@@ -21,8 +20,7 @@ def die(*argv, **kwargs):
         return
     user = kwargs.get('user', '')
     nick = user.split('!')[0]
-    ircd.send("QUIT oh_noes!_why_%s_whyyyy..._*ded*_X(_(Exited_normally!)\n" % nick)
-    global keep_running
+    global_vars.ircd.send("QUIT oh_noes!_why_%s_whyyyy..._*ded*_X(_(Exited_normally!)\n" % nick)
     global_vars.keep_running = False
     
     return

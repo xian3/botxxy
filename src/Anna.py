@@ -13,7 +13,7 @@ class Anna(object):
     def __init__(self, *args, **kwargs):
         self.ircd=kwargs.get('ircd', irc.ircd(kwargs.get('ircArgs', {})))
         self.cmd =kwargs.get('cmd', cmd_api.commands)
-        cmd_api.register_ircd(self.ircd)
+        global_vars.ircd = self.ircd
     def run(self):
         while global_vars.keep_running:
             msg = self.ircd.recv()
@@ -38,7 +38,7 @@ class Anna(object):
             
             if len(tokens) == 0:
                 continue
-
+            
             cmd = tokens[0].lower()
             
             found = False

@@ -1,6 +1,5 @@
 import argparse, os, sys
 from cmd_api import register_cmd
-ircd = None
 
 @register_cmd(name='hop', aliases=['hop'], usage='hop <nick>', description='hop')
 def hop(*argv, **kwargs):

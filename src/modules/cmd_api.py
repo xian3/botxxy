@@ -60,7 +60,3 @@ for entry in os.listdir(modules_dir):
     
 for func in commands:
     print 'Import "%s" added command "%s".' % (commands[func]['func'].func_globals['__name__'], func)
-    
-def register_ircd(ircd):
-    for func in commands.keys():
-        commands[func]['func'].func_globals['ircd']=ircd

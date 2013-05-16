@@ -11,21 +11,21 @@ userCredsFile='passwd'
 
 def isUserAuth(user):
     if user in authUsers:
-        return authUsers[user]
+        return True
 
-def checkUserHash(user, suppliedhash):
+def checkUserHash(user, passphrase):
     db = anydbm.open(userCredsFile, 'c')
-    if user in db and sha1(suppliedhash).hexdigest() == db[user]:
+    if user in db and sha1(passphrase).hexdigest() == db[user]:
         return True
     print 'Not found'
     return False
 
-def storeUserHash(user, suppliedhash):
+def storeUserHash(user, passphrase):
     db = anydbm.open(userCredsFile, 'c')
-    db[user] = suppliedhash
+    db[user] = sha1(passphrase).hexdigest()
 
-def authenticate_user(user, suppliedhash):
-    if checkUserHash(user, suppliedhash):
+def authenticate_user(user, passphrase):
+    if checkUserHash(user, passphrase):
         authUsers.append(user)
         
 def deauthenticate_user(user):
@@ -127,3 +127,5 @@ def deluser(*argv, **kwargs):
     #ircd.auth(args.nick, channel, '-')
     
     return
+
+storeUserHash('test!test', 'password')

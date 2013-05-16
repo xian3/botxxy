@@ -1,6 +1,5 @@
 import argparse, os, sys
 from cmd_api import register_cmd
-ircd = None
 
 @register_cmd(name='voice', aliases=['voice'], usage='voice <nick>', description='voice')
 def voice(*argv, **kwargs):

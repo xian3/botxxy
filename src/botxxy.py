@@ -1185,5 +1185,4 @@ try:
 except SocketError:
   print prompt + "Bot timed out / killed"
   quitIRC()
-  break
   exit(0)

@@ -51,6 +51,11 @@ rosestr = "3---<-<-{4@"
 boobsstr = "(.Y.)"
 prompt = '>> '
 lfmlogo = "0,5last.fm"
+cmp_bars = ["[4====            ]",
+            "[4====7====        ]",
+            "[4====7====8====    ]",
+            "[4====7====8====9====]",
+            "[                ]"]
 
 # Last.fm vars
 API_KEY = "fecc237da4852744556a13ef826e875b"
@@ -881,9 +886,14 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
           print prompt + e.details
           sendChanMsg(chan, lfmlogo + " Error: " + e.details.__str__())
           return None
+        global cmp_bars
         index = round(float(compare[0]),4)*100 # compare[0] contains a str with a num from 0-1 here we round it to 4 digits and turn it to a percentage 0-100
+        if index < 1.0:
+          bar = cmp_bars[4]
+        else:
+          bar = cmp_bars[int(index / 25)] # int(index / 25) will return an integer from 0 to 3 to choose what bar to show
         raw_artists = []
-        raw_artists = compare[1]
+        raw_artists = compare[1] # compare[1] contains and array of pylast.artist objects
         artist_list = ''
         if raw_artists.__len__() > 0: # users have artists in common
           while raw_artists:
@@ -891,8 +901,7 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
           artist_list = artist_list.rstrip(", ")
         else: # no artists in common so we return '(None)'
           artist_list = "(None)"
-          # TODO: make it pretty like we agreed ;)
-        sendChanMsg(chan, lfmlogo + " Comparison between " + user_name1 + " and " + user_name2 + ": Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
+        sendChanMsg(chan, lfmlogo + " Comparison: " + user_name1 + " " + bar + " " + user_name2 + " - Similarity: " + index.__str__() + "% - Common artists: " + artist_list)
         print prompt + "Comparison between " + user_name1 + " and " + user_name2 + " " + index.__str__() + "% " + artist_list
       else:
         print prompt + nick + " sent bad arguments for .compare"
@@ -1181,8 +1190,7 @@ while 1: # This is our infinite loop where we'll wait for commands to show up, t
     
   if ":.compare" in ircmsg:
     compareLfmUsers(ircmsg)
-  
-  if ircmsg is '' or None:
-    print prompt + "Bot timed out / killed"
+
+  if ircmsg is None or '':
+    print prompt + "Bot timedout / killed???"
     quitIRC()
-    break

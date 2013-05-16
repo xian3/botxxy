@@ -54,7 +54,8 @@ lfmlogo = "0,5last.fm"
 cmp_bars = ["[4====            ]",
             "[4====7====        ]",
             "[4====7====8====    ]",
-            "[4====7====8====9====]"]
+            "[4====7====8====9====]",
+            "[                ]"]
 
 # Last.fm vars
 API_KEY = "fecc237da4852744556a13ef826e875b"
@@ -887,7 +888,10 @@ def compareLfmUsers(msg): # use of the last.fm interface (pylast) in here
           return None
         global cmp_bars
         index = round(float(compare[0]),4)*100 # compare[0] contains a str with a num from 0-1 here we round it to 4 digits and turn it to a percentage 0-100
-        bar = cmp_bars[int(index / 25)] # int(index / 25) will return an integer from 0 to 3 to choose what bar to show
+        if index < 1.0:
+          bar = cmp_bars[4]
+        else:
+          bar = cmp_bars[int(index / 25)] # int(index / 25) will return an integer from 0 to 3 to choose what bar to show
         raw_artists = []
         raw_artists = compare[1] # compare[1] contains and array of pylast.artist objects
         artist_list = ''

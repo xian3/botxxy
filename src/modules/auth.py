@@ -1,4 +1,4 @@
-import argparse, os, sys
+import argparse, os, sys, anydbm
 from hashlib import sha1
 from cmd_api import register_cmd
 import pdb
@@ -6,6 +6,8 @@ ircd = None
 
 
 authUsers=[]
+
+userCredsFile='passwd'
 
 def isUserAuth(user):
     if user in authUsers:
@@ -15,11 +17,17 @@ def checkUserHash(user, suppliedhash):
     db = anydbm.open(userCredsFile, 'c')
     if user in db and sha1(suppliedhash).hexdigest() == db[user]:
         return True
+    print 'Not found'
     return False
+
+def storeUserHash(user, suppliedhash):
+    db = anydbm.open(userCredsFile, 'c')
+    db[user] = suppliedhash
 
 def authenticate_user(user, suppliedhash):
     if checkUserHash(user, suppliedhash):
         authUsers.append(user)
+        
 def deauthenticate_user(user):
     authUsers.pop(user)
 
@@ -35,7 +43,7 @@ def privileged_cmd(f):
     return exec_cmd
 
 @register_cmd(name='auth', aliases=['auth'], usage='auth <nick>', description='auth')
-@privileged_cmd
+#@privileged_cmd
 def auth(*argv, **kwargs):
     parser = argparse.ArgumentParser(prog=argv[0])
     parser.add_argument('passphrase', metavar='<passphrase>', action="store", help = 'The user to auth.')

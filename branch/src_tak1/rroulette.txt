@@ -1,0 +1,12 @@
+say theres 8 people in a channel. then 6 people would like to play, so they use the command to get in.
+then those six people are assigned a number randomly like 0-5. then the gun starts at 0.
+then they can use one of two commands !spinthebarrel or !pullthetrigger.
+if they want to spin the barrel it only works once if they try to use it twice.
+or they can just pull the trigger without spinning. then it goes onto the next person in line.
+but the gun would work as having a bullet randomly in 0-5 on the chamber.
+the bot would spin the barrel on the beginning of the game before anyones turn.
+the bullet say, it gets chamber 2 of the barrel (0-5) and player 1 gets the gun after the bot spun and its on chamber 0.
+he !pullstrigger. lives. it goes to the next person and the chamber is at 1. they dont spin the barrel and just !pulltrigger.
+they live and pass it on but now the chamber is at 2. the third player
+then we can maybe code it to keep remaining players and put in a new bullet at a random chamber.
+and spin the barrel and pass it to the next person in line.

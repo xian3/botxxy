@@ -5,6 +5,7 @@ except:
     pass
 import os, argparse, sys, urllib2, urllib, re, shlex, inspect, json
 from inspect import getmembers, isfunction
+import modules.global_vars as global_vars
 import irc
 from modules import cmd_api
 
@@ -14,7 +15,7 @@ class Anna(object):
         self.cmd =kwargs.get('cmd', cmd_api.commands)
         cmd_api.register_ircd(self.ircd)
     def run(self):
-        while True:
+        while global_vars.keep_running:
             msg = self.ircd.recv()
             if not msg.startswith(':'): continue
             split_msg = msg.split(' ',3)
@@ -48,9 +49,6 @@ class Anna(object):
             
             if not found:
                 print 'ERROR: Unsupported command "%s".' % (cmd)
-                
-            if tokens[0].lower() in ['die']:
-                break
         
 def main():
     anna = Anna()

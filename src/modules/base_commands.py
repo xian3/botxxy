@@ -3,7 +3,7 @@ from cmd_api import register_cmd
 
 
 
-@register_cmd(name='test', aliases=['test'], usage='test', description='Print test.')
+#@register_cmd(name='test', aliases=['test'], usage='test', description='Print test.')
 def test(*argv):
     parser = argparse.ArgumentParser(prog=argv[0])
     parser.add_argument('command', metavar='CMD', action="store", help = 'The command to run.')
